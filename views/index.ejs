@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>jquery test</title>
+		<!-- jQueryとjQueryUIを使えるようにする -->
+		<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+		<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+		
+		<!-- socket.ioを使えるようにする -->
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<style>
+			.fusen{
+				width: 200px;
+				height: 100px;
+				border: 1px solid #000;
+				position: absolute;
+			}
+			.fusen textarea{
+				width: 100%;
+				height: 100%;
+			}
+			.fusen .remove{
+				float: right;
+				width:50px;
+			}
+		</style>
+		<script>
+			$(function() {
+				// ここはページが読み終わったあとに走る処理です
+				
+				// ボタンにクリックイベントをつけます
+				$( "#fusen_tuika" ).click(fusen_tuika.bind(this, null));
+			});
+			
+			var socket = new io.connect("/");
+			socket.on("message", function(message){
+				console.log(["受け", message]);
+				// TODO: もらった材料で画面の同期をとる
+				
+				var targetFusen = $("#" + message.id);
+				if(message.action == "update"){
+					// 付箋の追加・更新の処理
+					if(targetFusen.length == 0){
+						// 新規追加
+						fusen_tuika(message);
+					}
+					
+					// 更新（座標、テキストエリア、色）
+					$("#" + message.id + "_textarea").val(message.value);
+					$("#" + message.id).css({top: parseInt(message.y), left: parseInt(message.x)});
+				}
+				else if(message.action = "delete"){
+					targetFusen.remove();
+				}
+			});
+
+			// 付箋を追加する関数
+			function fusen_tuika(message){
+				console.log("付箋を追加します");
+				// TODO: 付箋をつくって、ボードに貼る処理
+				var id = message? message.id : new Date().getTime();
+				var fusen = $("<div>").addClass("fusen").attr("id", id);
+				var header = $("<div>");
+				var deleteButton = $("<div>").addClass("remove").text("削除").click(fusen_sakujo.bind(this, id));
+				var textarea = $("<textarea>").attr("id", id + "_textarea");
+				
+				if(message){
+					textarea.val(message.value);
+					fusen.css({top: parseInt(message.y), left: parseInt(message.x)});
+				}
+				
+				textarea.change(fusen_hozon.bind(this, id));
+				textarea.keyup(fusen_douki.bind(this, id, "update"));
+				
+				fusen.append(header);
+				header.append(deleteButton);
+				fusen.append(textarea);
+				
+				fusen.appendTo(document.body);
+				
+				// class=fusenの要素をドラッグ可能にします
+				fusen.draggable({
+					drag: function(id, e){
+//						console.log(e.pageX + ", " + e.pageY);
+						// TODO: 同期
+						fusen_douki(id, "update");
+					}.bind(this, id),
+					stop: function(id, e){
+						console.log("ドラッグがおわりました。");
+						// TODO: 保存処理
+						fusen_hozon(id);
+					}.bind(this, id)
+				});
+				
+				// TODO: 保存処理
+				fusen_hozon(id);
+				// TODO: 同期
+				fusen_douki(id, "update");
+			}
+			
+			// 付箋を削除する関数
+			function fusen_sakujo(id){
+				console.log("付箋を削除します");
+				
+				// TODO: 同期
+				fusen_douki(id, "delete");
+				$("#" + id).remove();
+			}
+			
+			// 付箋を保存する関数
+			function fusen_hozon(id){
+				console.log("付箋を保存します");
+				// TODO: 付箋情報を送信（色、座標、文字）
+				var data = {
+					x: $("#" + id).offset().left,
+					y: $("#" + id).offset().top,
+					value: $("#" + id + "_textarea").val(),
+					id: id
+				};
+				console.log(data);
+				socket.emit("save", data);
+			}
+			
+			// 付箋を同期する関数
+			function fusen_douki(id, action){
+				console.log("付箋を同期します");
+				// TODO: 付箋情報を送信（色、座標、文字）
+				var data = {
+					action: action,	// update|delete
+					x: $("#" + id).offset().left,
+					y: $("#" + id).offset().top,
+					value: $("#" + id + "_textarea").val(),
+					id: id
+				};
+				console.log(data);
+				socket.emit("message", data);
+			}
+		</script>
+	</head>
+	<body>
+		<input id="fusen_tuika" type="button" value="付箋を追加">
+		
+		<!--
+		<div class="fusen">
+			<div>
+				<div class="remove">削除</div>
+			</div>
+			<textarea>ロース弁当</textarea>
+		</div>
+		-->
+	</body>
+</html>
