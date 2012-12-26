@@ -1,10 +1,14 @@
 2012ie02
 ========
 
-¡“®‚©‚µ‚©‚½
-2012ie02‚ÉˆÚ“®‚µ‚ÄAnodeModule‚ðƒCƒ“ƒXƒg[ƒ‹
+ã€èµ·å‹•æ‰‹é †ã€‘
+
+nodeModuleã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«
 > npm install
+
+èµ·å‹•
 > node app
 
-mongodb‚ð‹N“®‚µ‚Ä‚¨‚­•K—v‚ª‚ ‚è‚Ü‚·B
+
+mongodbã‚’èµ·å‹•ã—ã¦ãŠãå¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
 http://keicode.com/db/mongodb-install.php
