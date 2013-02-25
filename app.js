@@ -12,6 +12,8 @@ var mongoose = require('mongoose');
 
 (function(){
   mongoose.connect("mongodb://localhost:27017/mydb6");
+//  mongoose.connect("mongodb://nodejitsu_2012ie02:kd6s3hjpb3qihj1kqq81n9r265@ds049537.mongolab.com:49537/nodejitsu_2012ie02_nodejitsudb9518523029");
+  
   
   var Schema = mongoose.Schema;
   
@@ -20,7 +22,10 @@ var mongoose = require('mongoose');
     value: String,
     x: String,
     y: String,
-    updateDate : Date
+    width: String,
+    height: String,
+    updateDate : Date, 
+    color: String
   });
   
   mongoose.model('Fusen', fusenSchema);
@@ -48,14 +53,8 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 
-/*
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
-});
-*/
-
 var server = http.createServer(app).listen(app.get('port'), function(){
-console.log("Express server listening on port " + app.get('port'));
+ console.log("Express server listening on port " + app.get('port'));
 });
 var socket = require('socket.io').listen(server);
 socket.on('connection', function(client) {
@@ -68,6 +67,9 @@ socket.on('connection', function(client) {
  	 			x: fusenList[i].x,
  	 			y: fusenList[i].y,
  	 			value: fusenList[i].value,
+        width: fusenList[i].width,
+        height: fusenList[i].height,
+        color: fusenList[i].color,
  	 			id: fusenList[i].id
  	 		});
  	 	}
@@ -75,12 +77,19 @@ socket.on('connection', function(client) {
  })
  
  client.on('message', function(event){
-   // 送信元以外の全てのクライアントへメッセージ送信
+
+   //蜑企勁
+   if(event.action == 'delete'){
+    var Fusen = mongoose.model('Fusen');
+    Fusen.remove({id : event.id}, function(err){
+      if(!err) console.log(event.id)
+      })
+   }
+
    client.broadcast.emit('message', event);
   });
  
  client.on('save', function(event){
- 	// データをmongoに保存
     var Fusen = mongoose.model('Fusen');
     console.log(event);
     
@@ -92,6 +101,9 @@ socket.on('connection', function(client) {
     	fusen.x = event.x;
     	fusen.y = event.y;
     	fusen.value = event.value;
+      fusen.width = event.width;
+      fusen.height = event.height;
+      fusen.color = event.color;
 	    fusen.save(function(err) {
 	      if(!err) console.log('saved!')
 	    });

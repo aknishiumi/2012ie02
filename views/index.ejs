@@ -1,29 +1,23 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>jquery test</title>
+		<title>付箋ボード</title>
 		<!-- jQueryとjQueryUIを使えるようにする -->
 		<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
 		<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-		
+    	<script src="/javascripts/jquery.ui.touch-punch.min.js"></script>
+	    <script src="/javascripts/jquery.simple-color-picker.js"></script>
+		<script type="text/javascript" src="/javascripts/jquery.textresizer.js"></script>
+		<script type="text/javascript" src="/javascripts/jquery.cookie.js"></script>
+
 		<!-- socket.ioを使えるようにする -->
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
-		<style>
-			.fusen{
-				width: 200px;
-				height: 100px;
-				border: 1px solid #000;
-				position: absolute;
-			}
-			.fusen textarea{
-				width: 100%;
-				height: 100%;
-			}
-			.fusen .remove{
-				float: right;
-				width:50px;
-			}
-		</style>
+
+		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/themes/redmond/jquery-ui.css">
+		<link type="text/css" href="/stylesheets/jquery.simple-color-picker.css" rel="stylesheet" />
+		<link rel="stylesheet" href="/stylesheets/style.css">
+
+
 		<script>
 			$(function() {
 				// ここはページが読み終わったあとに走る処理です
@@ -33,9 +27,15 @@
 			});
 			
 			var socket = new io.connect("/");
+
+socket.on("connect", function(){
+	console.log(socket.socket.transport.name);
+});
+
+
 			socket.on("message", function(message){
-				console.log(["受け", message]);
-				// TODO: もらった材料で画面の同期をとる
+				console.log(["受信", message]);
+				// もらった材料で画面の同期をとる
 				
 				var targetFusen = $("#" + message.id);
 				if(message.action == "update"){
@@ -47,7 +47,13 @@
 					
 					// 更新（座標、テキストエリア、色）
 					$("#" + message.id + "_textarea").val(message.value);
-					$("#" + message.id).css({top: parseInt(message.y), left: parseInt(message.x)});
+					$("#" + message.id).css({
+						top: parseInt(message.y), 
+						left: parseInt(message.x),
+						width: parseInt(message.width),
+						height: parseInt(message.height), 
+						backgroundColor: message.color
+					});
 				}
 				else if(message.action = "delete"){
 					targetFusen.remove();
@@ -60,13 +66,24 @@
 				// TODO: 付箋をつくって、ボードに貼る処理
 				var id = message? message.id : new Date().getTime();
 				var fusen = $("<div>").addClass("fusen").attr("id", id);
-				var header = $("<div>");
-				var deleteButton = $("<div>").addClass("remove").text("削除").click(fusen_sakujo.bind(this, id));
+
+				// ヘッダ部
+				var header = $("<div>").addClass("header");
+				var deleteButton = $("<div>").addClass("remove").click(fusen_sakujo.bind(this, id));
+				var fontSizeButton = $("<div>").addClass("fontSize").attr("id", "fontSize_" + id);
+				var colorChangeButton = $("<div>").addClass("colorChange").attr("id", "fontSize_" + id);
+
 				var textarea = $("<textarea>").attr("id", id + "_textarea");
 				
 				if(message){
 					textarea.val(message.value);
-					fusen.css({top: parseInt(message.y), left: parseInt(message.x)});
+					fusen.css({
+						top: parseInt(message.y), 
+						left: parseInt(message.x),
+						width: parseInt(message.width),
+						height: parseInt(message.height),
+						backgroundColor: message.color
+					});
 				}
 				
 				textarea.change(fusen_hozon.bind(this, id));
@@ -74,27 +91,90 @@
 				
 				fusen.append(header);
 				header.append(deleteButton);
+				header.append(fontSizeButton);
+				header.append(colorChangeButton);
 				fusen.append(textarea);
 				
 				fusen.appendTo(document.body);
 				
 				// class=fusenの要素をドラッグ可能にします
 				fusen.draggable({
+					handle: header,
 					drag: function(id, e){
 //						console.log(e.pageX + ", " + e.pageY);
-						// TODO: 同期
+						// 同期
 						fusen_douki(id, "update");
 					}.bind(this, id),
 					stop: function(id, e){
 						console.log("ドラッグがおわりました。");
-						// TODO: 保存処理
+						// 保存処理
+						fusen_hozon(id);
+					}.bind(this, id)
+				});
+
+				// 色変更
+				colorChangeButton.simpleColorPicker({
+					showEffect: 'fade',
+					hideEffect: 'fade',
+					onChangeColor: function(color){
+						$("#" + id).css({backgroundColor: color});
+						fusen_hozon(id);
+						fusen_douki(id, "update");
+					}
+				});
+
+				// フォントサイズ変更
+				var font_size_change = $("<ul>").addClass("fontSizeChange").attr("id", "fontSize_" + id);
+				var font_size_small  = $("<li>").append($("<a>").addClass("css_button").attr("href", "#").text("小"));
+				font_size_change.append(font_size_small);
+				var font_size_middle  = $("<li>").append($("<a>").addClass("css_button").attr("href", "#").text("中"));
+				font_size_change.append(font_size_middle);
+				var font_size_large  = $("<li>").append($("<a>").addClass("css_button").attr("href", "#").text("大"));
+				font_size_change.append(font_size_large);
+
+				fontSizeButton.append(font_size_change);
+
+				// フォントサイズ変更
+				$("a", font_size_change).textresizer({
+					target: textarea, //フォントサイズを変更したい場所を指定
+					sizes: ["8px","16px","24px"]
+				});
+				fontSizeButton.click(function(){
+					font_size_change.show();
+
+					console.log($(this).offset().left);
+					font_size_change.css({
+						top: 0, 
+						left: 200
+					});
+				});
+
+
+				// リサイズ
+				fusen.resizable({
+					handles: "se",
+					resize: function(id, e){
+						fusen_douki(id, "update");
+					}.bind(this, id),
+					stop: function(id, e){
 						fusen_hozon(id);
 					}.bind(this, id)
 				});
 				
-				// TODO: 保存処理
+				fusen.mousedown(function(id){
+					// mousedown時に最前へ
+					var topZIndex = 0;
+					$(".fusen").each(function(idx, elm){
+						var zIndex = $(elm).css("z-index");
+						if(zIndex > topZIndex)
+							topZIndex = zIndex;
+						});
+					$("#" + id).css("z-index", parseInt(topZIndex)+1);
+				}.bind(this, id));
+
+				// 保存処理
 				fusen_hozon(id);
-				// TODO: 同期
+				// 同期
 				fusen_douki(id, "update");
 			}
 			
@@ -102,7 +182,7 @@
 			function fusen_sakujo(id){
 				console.log("付箋を削除します");
 				
-				// TODO: 同期
+				// 同期
 				fusen_douki(id, "delete");
 				$("#" + id).remove();
 			}
@@ -115,6 +195,9 @@
 					x: $("#" + id).offset().left,
 					y: $("#" + id).offset().top,
 					value: $("#" + id + "_textarea").val(),
+					width: $("#" + id).width(),
+					height: $("#" + id).height(),
+					color: $("#" + id).css("background-color"),
 					id: id
 				};
 				console.log(data);
@@ -130,6 +213,9 @@
 					x: $("#" + id).offset().left,
 					y: $("#" + id).offset().top,
 					value: $("#" + id + "_textarea").val(),
+					width: $("#" + id).width(),
+					height: $("#" + id).height(),
+					color: $("#" + id).css("background-color"),
 					id: id
 				};
 				console.log(data);
@@ -138,15 +224,6 @@
 		</script>
 	</head>
 	<body>
-		<input id="fusen_tuika" type="button" value="付箋を追加">
-		
-		<!--
-		<div class="fusen">
-			<div>
-				<div class="remove">削除</div>
-			</div>
-			<textarea>ロース弁当</textarea>
-		</div>
-		-->
+		<input id="fusen_tuika" type="image" class="addbutton" src="/images/addbtn2.gif" value="付箋を追加">
 	</body>
 </html>

@@ -1,8 +1,117 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+body{
+	background-image : url(/images/colk_bord300.jpg);
+	font-size: 18px;
+}
+.fusen{
+	width: 200px;
+	height: 100px;
+	border: 1px solid #000;
+	position: absolute;
+	padding: 5px;
+	background-color : #ffffcc;
+	box-shadow:6px 6px 12px #333333;
+	z-index: 1;
+}
+.fusen .header{
+	width: 100%;
+	height: 20px;
+	cursor: move;
+}
+.fusen textarea{
+	width: 98%;
+	height: 73%;
+	background-color : transparent;
+	resize: none;
+	border: none;
+	font-size: 18px;
+}
+.fusen .header .remove{
+	margin-left: 4px;
+	cursor: pointer;
+	float: right;
+	width:24px;
+	height: 24px;
+	background-image : url(/images/1361709741_Close.png);
+	background-repeat: no-repeat;
+}
+.fusen .header .fontSize{
+	margin-left: 4px;
+	cursor: pointer;
+	float: right;
+	width:24px;
+	height: 24px;
+	background-image : url(/images/1361710640_stock_font-size.png);
+	background-repeat: no-repeat;
+}
+.fusen .header .colorChange{
+	margin-left: 4px;
+	cursor: pointer;
+	float: right;
+	width:24px;
+	height: 24px;
+	background-image : url(/images/1361709819_icons.png);
+	background-repeat: no-repeat;
 }
 
-a {
-  color: #00B7FF;
+.fusen .fontSizeChange{
+	position: absolute;
+	display:none;
 }
+
+.addbutton{
+	box-shadow:6px 6px 12px #333333;
+}
+.addbutton:hover{
+	box-shadow:6px 6px 12px #000;
+}
+.addbutton:active{
+	box-shadow:3px 3px 12px #000;
+}
+
+.color-picker{
+	z-index: 99999;
+}
+
+.fusen ul{
+	white-space: nowrap;
+}
+
+.fusen ul li {
+  float: left;
+  list-style: none;
+}
+
+.css_button {
+	margin-left: 2px;
+	font-size:10px;
+	font-family:Arial;
+	font-weight:normal;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	border:1px solid #337fed;
+	padding:2px 7px;
+	text-decoration:none;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(5%, #3d94f6), color-stop(100%, #1e62d0) );
+	background:-moz-linear-gradient( center top, #3d94f6 5%, #1e62d0 100% );
+	background:-ms-linear-gradient( top, #3d94f6 5%, #1e62d0 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#3d94f6', endColorstr='#1e62d0');
+	background-color:#3d94f6;
+	color:#ffffff;
+	display:inline-block;
+	text-shadow:2px 2px 0px #1570cd;
+ 	-webkit-box-shadow:inset 2px -7px 0px -7px #97c4fe;
+ 	-moz-box-shadow:inset 2px -7px 0px -7px #97c4fe;
+ 	box-shadow:inset 2px -7px 0px -7px #97c4fe;
+}.css_button:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(5%, #1e62d0), color-stop(100%, #3d94f6) );
+	background:-moz-linear-gradient( center top, #1e62d0 5%, #3d94f6 100% );
+	background:-ms-linear-gradient( top, #1e62d0 5%, #3d94f6 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#1e62d0', endColorstr='#3d94f6');
+	background-color:#1e62d0;
+}.css_button:active {
+	position:relative;
+	top:1px;
+	opacity: 0.8;
+}
+
