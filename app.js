@@ -67,9 +67,9 @@ socket.on('connection', function(client) {
  	 			x: fusenList[i].x,
  	 			y: fusenList[i].y,
  	 			value: fusenList[i].value,
-        width: fusenList[i].width,
-        height: fusenList[i].height,
-        color: fusenList[i].color,
+		        width: fusenList[i].width,
+			    height: fusenList[i].height,
+		        color: fusenList[i].color,
  	 			id: fusenList[i].id
  	 		});
  	 	}
@@ -101,9 +101,9 @@ socket.on('connection', function(client) {
     	fusen.x = event.x;
     	fusen.y = event.y;
     	fusen.value = event.value;
-      fusen.width = event.width;
-      fusen.height = event.height;
-      fusen.color = event.color;
+        fusen.width = event.width;
+        fusen.height = event.height;
+        fusen.color = event.color;
 	    fusen.save(function(err) {
 	      if(!err) console.log('saved!')
 	    });

@@ -8,7 +8,6 @@
     	<script src="/javascripts/jquery.ui.touch-punch.min.js"></script>
 	    <script src="/javascripts/jquery.simple-color-picker.js"></script>
 		<script type="text/javascript" src="/javascripts/jquery.textresizer.js"></script>
-		<script type="text/javascript" src="/javascripts/jquery.cookie.js"></script>
 
 		<!-- socket.ioを使えるようにする -->
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -27,11 +26,6 @@
 			});
 			
 			var socket = new io.connect("/");
-
-socket.on("connect", function(){
-	console.log(socket.socket.transport.name);
-});
-
 
 			socket.on("message", function(message){
 				console.log(["受信", message]);
@@ -137,19 +131,17 @@ socket.on("connect", function(){
 				// フォントサイズ変更
 				$("a", font_size_change).textresizer({
 					target: textarea, //フォントサイズを変更したい場所を指定
-					sizes: ["8px","16px","24px"]
+					sizes: ["16px","24px","36px"]
 				});
-				fontSizeButton.click(function(){
-					font_size_change.show();
-
-					console.log($(this).offset().left);
-					font_size_change.css({
-						top: 0, 
-						left: 200
-					});
+				fontSizeButton.click(function(e){
+					e.stopPropagation();
+					font_size_change.fadeIn();
 				});
-
-
+				$("li", fontSizeButton).click({id: id}, function(e){
+					fusen_douki(e.data.id, "update");
+					fusen_hozon(e.data.id);
+				});
+				
 				// リサイズ
 				fusen.resizable({
 					handles: "se",
@@ -198,6 +190,7 @@ socket.on("connect", function(){
 					width: $("#" + id).width(),
 					height: $("#" + id).height(),
 					color: $("#" + id).css("background-color"),
+					fontSize: $("#" + id + "_textarea").css("font-size"),
 					id: id
 				};
 				console.log(data);
@@ -216,11 +209,16 @@ socket.on("connect", function(){
 					width: $("#" + id).width(),
 					height: $("#" + id).height(),
 					color: $("#" + id).css("background-color"),
+					fontSize: $("#" + id + "_textarea").css("font-size"),
 					id: id
 				};
 				console.log(data);
 				socket.emit("message", data);
 			}
+			
+			$(document).click(function(){
+				$(".fontSizeChange").fadeOut();
+			})
 		</script>
 	</head>
 	<body>

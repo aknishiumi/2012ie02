@@ -55,7 +55,15 @@ body{
 
 .fusen .fontSizeChange{
 	position: absolute;
+	background-color: #FFF;
+	border: 1px solid #000;
+	padding: 1px;
 	display:none;
+}
+
+.fusen .fontSizeChange li{
+	position: relative;
+	top: -2px;
 }
 
 .addbutton{
